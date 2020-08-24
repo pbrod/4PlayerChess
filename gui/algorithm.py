@@ -188,7 +188,7 @@ class Algorithm(QObject):
 
     def newGame(self):
         """Initializes board and sets starting position."""
-        if SETTINGS.value('chesscom'):
+        if SETTINGS.value('chesscom', type='bool'):
             fen4 = self.chesscomStartFen4
         else:
             fen4 = self.startFen4
@@ -204,7 +204,7 @@ class Algorithm(QObject):
         fen4 += '- '  # En passant target square, n/a
         fen4 += str(self.moveNumber) + ' '  # Number of quarter-moves
         fen4 += str(self.moveNumber // 4 + 1)  # Number of full moves, starting from 1
-        if SETTINGS.value('chesscom'):
+        if SETTINGS.value('chesscom', type='bool'):
             chesscomPrefix = self.currentPlayer.upper() + '-0,0,0,0' + \
                              self.toChesscomCastling(self.board.castlingAvailability()) + '-0,0,0,0-' + \
                              str(self.moveNumber) + '-'
@@ -250,7 +250,7 @@ class Algorithm(QObject):
         self.setupBoard()
         self.board.parseFen4(fen4)
         self.setResult(self.NoResult)
-        if SETTINGS.value('chesscom'):
+        if SETTINGS.value('chesscom', type='bool'):
             self.setCurrentPlayer(fen4[0].lower())
             self.moveNumber = 0
             self.fenMoveNumber = 1
@@ -395,17 +395,24 @@ class Algorithm(QObject):
             else:
                 fromFile, fromRank, toFile, toRank = [None] * 4
         else:
-            if move[0].isupper():
-                move = move[1:]
+            for c in reversed(move):  # pab
+                if c.isupper():  # pab
+                    move = move.replace(c, '')  # pab
+            # if move[0].isupper():
+            #    move = move[1:]
+
             move = move.replace('x', '')
+            move = move.replace('-', '')  # pab
+            move = move.replace('+', '')  # pab
+            move = move.replace('#', '')  # pab
             prev = ''
-            i = 0
-            for char in move:
+            #i = 0
+            for i, char in enumerate(move):
                 if (not char.isdigit()) and prev.isdigit():
                     move = [move[:i], move[i:]]
                     break
                 prev = char
-                i += 1
+                # i += 1
             fromFile = ord(move[0][0]) - 97
             fromRank = int(move[0][1:]) - 1
             toFile = ord(move[1][0]) - 97
@@ -547,7 +554,7 @@ class Algorithm(QObject):
         pgn4 += '[TimeControl "G/1 d15"]\n'  # 1-minute game with 15 seconds delay per move
         pgn4 += '[PlyCount "' + str(self.moveNumber) + '"]\n'  # Total number of quarter-moves
         startFen4 = self.currentMove.getRoot().fen4
-        if SETTINGS.value('chesscom'):
+        if SETTINGS.value('chesscom', type='bool'):
             if startFen4 != self.chesscomStartFen4:
                 pgn4 += '[SetUp "1"]\n'
                 pgn4 += '[StartFen4 "' + startFen4 + '"]\n'
@@ -559,7 +566,7 @@ class Algorithm(QObject):
         pgn4 += '[CurrentPosition "' + self.getFen4() + '"]\n\n'
 
         # Movetext
-        if SETTINGS.value('chesscom'):
+        if SETTINGS.value('chesscom', type='bool'):
             pgn4 = pgn4[:-1]  # remove newline
             pgn4 += self.chesscomMoveText
         else:
@@ -584,8 +591,9 @@ class Algorithm(QObject):
             self.selectMove.emit(key)
 
     def getMoveText(self, node, move=1, var=0):
-        """Traverses move tree to generate movetext and updates move dictionary to keep track of the nodes associated
-        with the movetext."""
+        """Traverses move tree to generate movetext and updates move dictionary to keep
+        track of the nodes associated with the movetext.
+        """
         if node.children:
             main = node.children[0]
             if len(node.children) > 1:
@@ -695,9 +703,11 @@ class Algorithm(QObject):
                 self.moveText += token + ' '
                 self.moveDict[(self.index, token)] = None
 
-    def split_(self, movetext):
+    @staticmethod
+    def split_(movetext):
         """Splits movetext into tokens."""
-        x = split('\s+(?={)|(?<=})\s+', movetext)  # regex: one or more spaces followed by { or preceded by }
+        # regex: one or more spaces followed by { or preceded by }
+        x = split('\s+(?={)|(?<=})\s+', movetext)
         movetext = []
         for y in x:
             if y:
@@ -710,49 +720,49 @@ class Algorithm(QObject):
 
     def parseChesscomPgn4(self, pgn4):
         """Parses chess.com PGN4 and sets game state accordingly."""
-        startPosition = None
+        # startPosition = None  # TODO: Delete? it is unused
         currentMove = None
         lines = pgn4.split('\n')
         movetext = ''
+        attributes = {'Red': 'redName',
+                      'RedElo': 'redRating',
+                      'Blue': 'blueName',
+                      'BlueElo': 'blueRating',
+                      'Yellow': 'yellowName',
+                      'YellowElo': 'yellowRating',
+                      'Green': 'greenName',
+                      'GreenElo': 'greenRating',
+                      'Result': 'result'
+                      }
         for line in lines:
+            line = line.strip()  # pab
             if line == '':
                 continue
             elif line[0] == '[' and line[-1] == ']':
+                #==================================================================================
+                # Tags section
+                #==================================================================================
                 tag = line.strip('[]').split('"')[:-1]
                 tag[0] = tag[0].strip()
                 if tag[0] == 'Variant' and tag[1] == 'FFA':
                     self.cannotReadPgn4.emit()
                     return False
-                elif tag[0] == 'Red':
-                    self.redName = tag[1]
-                elif tag[0] == 'RedElo':
-                    self.redRating = tag[1]
-                elif tag[0] == 'Blue':
-                    self.blueName = tag[1]
-                elif tag[0] == 'BlueElo':
-                    self.blueRating = tag[1]
-                elif tag[0] == 'Yellow':
-                    self.yellowName = tag[1]
-                elif tag[0] == 'YellowElo':
-                    self.yellowRating = tag[1]
-                elif tag[0] == 'Green':
-                    self.greenName = tag[1]
-                elif tag[0] == 'GreenElo':
-                    self.greenRating = tag[1]
-                elif tag[0] == 'Result':
-                    self.result = tag[1]
-                elif tag[0] == 'StartFen4':
-                    startPosition = tag[1]
+                name = attributes.get(tag[0])
+                if name is not None:
+                    setattr(self, name, tag[1])
                 elif tag[0] == 'CurrentMove':
                     currentMove = tag[1]
-                else:
-                    # Irrelevant tags
-                    pass
+                # else: # Irrelevant tags
+                continue
             else:
                 if not currentMove:
                     self.cannotReadPgn4.emit()
                     return False
                 movetext += line + ' '
+
+            #======================================================================================
+            # Movetext section
+            #======================================================================================
             # Generate game from movetext
             self.newGame()
             tokens = self.split_(movetext)
@@ -763,8 +773,8 @@ class Algorithm(QObject):
                     tokens[index] = token[0]
             roots = []
             prev = None
-            i = 0
-            for token in tokens:
+            # i = 0
+            for i, token in enumerate(tokens):
                 try:
                     next_ = tokens[i + 1]
                 except IndexError:
@@ -778,9 +788,7 @@ class Algorithm(QObject):
                     # Next move is variation
                     if not prev == ')':
                         self.prevMove()
-                        roots.append(self.currentMove)
-                    else:
-                        roots.append(self.currentMove)
+                    roots.append(self.currentMove)
                 elif token == ')':
                     # End of variation
                     root = roots.pop()
@@ -790,10 +798,15 @@ class Algorithm(QObject):
                         # Continue with previous line
                         self.nextMove()
                 else:
-                    fromFile, fromRank, toFile, toRank = self.fromChesscomMove(token, self.currentPlayer)
+                    # try: # TODO: Crashes frequently here! (typically token="*")
+                    fromFile, fromRank, toFile, toRank = self.fromChesscomMove(token,
+                                                                               self.currentPlayer)
                     self.makeMove(fromFile, fromRank, toFile, toRank)
+                    # except Exception as error:
+                    #    print(error)
+
                 prev = token
-                i += 1
+                # i += 1
         # Set game position to CurrentMove ("ply-variation-move")
         self.firstMove()
         currentMove = [int(c) for c in currentMove.split('-')]
@@ -814,13 +827,105 @@ class Algorithm(QObject):
         return True
 
     def parsePgn4(self, pgn4):
-        """Parses PGN4 and sets game state accordingly."""
+        """Parses PGN4 and sets game state accordingly.
+
+        References
+        ----------
+        https://en.wikibooks.org/wiki/Four-Player_Chess/Notation
+        https://en.wikipedia.org/wiki/Portable_Game_Notation
+        https://ia802908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt
+
+        Algebraic notation
+        ------------------
+        For four-player chess the same algebraic notation as for regular chess can be used:
+
+        K = king
+        Q = queen
+        R = rook
+        B = bishop
+        N = knight
+        No letter is used for pawn moves.
+
+        When the move is a capture, an x is inserted between the origin and destination square.
+        If two pieces of the same type can move to the same square, the file or rank of origin
+        (or both, if necessary) are added after the piece's letter.
+        Pawn promotion is indicated by appending =Q to the move (or, in case of underpromotion, =N, =B or =R).
+        Kingside castling (short castle) is notated as O-O.
+        Queenside castling  (long castle) is notated as O-O-O.
+        Check is indicated by appending + to the move and
+        in case of double and triple check ++ and +++, respectively.
+        Checkmate is indicated by appending # to the move.
+        Piece manoeuvres are notated as the piece letter followed by the origin square,
+        any intermediate squares and the destination square, separated by a hyphen,
+        e.g. Qg1-k5-g9.
+        In case of manoeuvres involving captures, the moves are written in full,
+        separated by hyphens, e.g. Nk12-Nxm11-Nxn9.
+        Diagonals are notated as start and end square, separated by a hyphen.
+        Diagonals are always considered from left to right, hence the start square is the
+        leftmost square, i.e. start and end are in alphabetical order in terms of files.
+        For example, "e14-n5 diagonal" and not "n5-e14 diagonal".
+        Other common annotations include:
+
+        ! = good move
+        !! = excellent move
+        ? = bad move
+        ?? = blunder
+        !? = potentially interesting move
+        ?! = dubious move
+
+        Long algebraic notation
+        -----------------------
+        Alternatively, long algebraic notation can be used for clarity.
+        In long algebraic notation both the origin and destination square are indicated,
+        separated by a hyphen, e.g. Qn8-m9. When the move is a capture, the hyphen is
+        replaced by an x and the letter of the captured piece is also included, e.g. Qg1xQn8+.
+
+
+        The movetext describes the actual moves of the game. This includes move number
+        indicators (numbers followed by either one or three periods; one if the next move
+        is White's move, three if the next move is Black's move) and movetext in Standard
+        Algebraic Notation (SAN).
+
+        For most moves the SAN consists of the letter abbreviation for the piece, an x if
+        there is a capture, and the two-character algebraic name of the final square the
+        piece moved to. The letter abbreviations are K (king), Q (queen), R (rook),
+        B (bishop), and N (knight). The pawn is given an empty abbreviation in SAN movetext,
+        but in other contexts the abbreviation P is used. The algebraic name of any square
+        is as per usual algebraic chess notation; from white's perspective,
+        the leftmost square closest to white is a1, the rightmost square closest to the
+        white is h1, and the rightmost (from white's perspective) square closest to black
+        side is h8.
+
+        In a few cases a more detailed representation is needed to resolve ambiguity;
+        if so, the piece's file letter, numerical rank, or the exact square is inserted
+        after the moving piece's name (in that order of preference). Thus, Nge2 specifies
+        that the knight originally on the g-file moves to e2.
+
+        SAN kingside castling is indicated by the sequence O-O;
+        queenside castling is indicated by the sequence O-O-O (note that these are capital Os,
+        not zeroes, contrary to the FIDE standard for notation).
+        [3] Pawn promotions are notated by appending = to the destination square,
+        followed by the piece the pawn is promoted to. For example: e8=Q. If the move is a
+        checking move, + is also appended; if the move is a checkmating move, # is appended
+        instead. For example: e8=Q#.
+
+        An annotator who wishes to suggest alternative moves to those actually played in the
+        game may insert variations enclosed in parentheses. They may also comment on the game
+        by inserting Numeric Annotation Glyphs (NAGs) into the movetext. Each NAG reflects a
+        subjective impression of the move preceding the NAG or of the resultant position.
+
+        If the game result is anything other than *, the result is repeated at the end of
+        the movetext.
+        """
+
         currentPosition = None
         lines = pgn4.split('\n')
         for line in lines:
+            line = line.strip()  # pab
             if line == '':
                 continue
             elif line[0] == '[' and line[-1] == ']':
+                # tag pair section
                 tag = line.strip('[]').split('"')[:-1]
                 tag[0] = tag[0].strip()
                 if tag[0] == 'Variant' and tag[1] == 'FFA':
@@ -845,6 +950,7 @@ class Algorithm(QObject):
                 if not currentPosition:
                     self.cannotReadPgn4.emit()
                     return False
+                # movetext section.
                 # Generate game from movetext
                 self.newGame()
                 line = line.replace(' *', '')

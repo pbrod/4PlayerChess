@@ -801,7 +801,7 @@ class Board(QObject):
 
     def parseFen4(self, fen4):
         """Sets board position according to the FEN4 string fen4."""
-        if SETTINGS.value('chesscom'):
+        if SETTINGS.value('chesscom', type='bool'):
             # Remove chess.com prefix and commas
             i = fen4.rfind('-')
             fen4 = fen4[i+1:]

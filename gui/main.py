@@ -212,9 +212,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             <center>
             <p><b>This software uses PyQt5</b></p>
             <small>
-            <p>PyQt5 is a comprehensive set of Python bindings for Qt 5. PyQt brings together the Qt 
+            <p>PyQt5 is a comprehensive set of Python bindings for Qt 5. PyQt brings together the Qt
             C++ cross-platform application framework and the cross-platform interpreted language Python.</p>
-            <p>PyQt is copyright &copy; <a href = 'https://www.riverbankcomputing.com/software/pyqt/' style = 
+            <p>PyQt is copyright &copy; <a href = 'https://www.riverbankcomputing.com/software/pyqt/' style =
             'color:white;'>Riverbank Computing Ltd.</a></p>
             <p>Qt is copyright &copy; <a href = 'https://www.qt.io' style =
             'color:white;'>The Qt Company Ltd.</a></p>
@@ -259,10 +259,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             <ul>
                 <li>Right-click on a square to highlight the square.</li>
                 <li>Right-click and drag to draw arrows.</li>
-                <li>Hold numeric key 0, 1, 2, 3 or 4 while clicking or dragging for orange (default), red, blue, yellow 
+                <li>Hold numeric key 0, 1, 2, 3 or 4 while clicking or dragging for orange (default), red, blue, yellow
                 or green, respectively.</li>
                 <li>Left-click any empty square to remove all arrows and highlighted squares.</li>
-                <li>Left-clicking any empty square while holding numeric key 0, 1, 2, 3 or 4 will remove all arrows and 
+                <li>Left-clicking any empty square while holding numeric key 0, 1, 2, 3 or 4 will remove all arrows and
                 square highlights of the respective color only.</li>
                 <li>Drawing an existing arrow or square highlight again will remove it.</li>
             </ul>
@@ -274,23 +274,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             </ul>
             <h3>Player names and rating</h3>
             <ul>
-                <li>Click a player name to edit the name and rating. You can specify the rating by typing the name 
+                <li>Click a player name to edit the name and rating. You can specify the rating by typing the name
                 followed by a space and then the rating.</li>
             </ul>
             <h3>Preferences</h3>
             <ul>
                 <li>'Show mouseover coordinate' will display the coordinate of a square when moving the mouse over it.
                 </li>
-                <li>'Auto-change arrow color' will change the color of arrows and square highlights with the board 
-                orientation, e.g. if the bottom player is red, the color will be red. If unchecked, the default color 
+                <li>'Auto-change arrow color' will change the color of arrows and square highlights with the board
+                orientation, e.g. if the bottom player is red, the color will be red. If unchecked, the default color
                 will be orange.</li>
-                <li>'Auto-rotate' will automatically rotate the board 90 degrees counterclockwise after each move. The 
-                current player will always be at the bottom, unless the board is manually rotated, e.g. if the board is 
+                <li>'Auto-rotate' will automatically rotate the board 90 degrees counterclockwise after each move. The
+                current player will always be at the bottom, unless the board is manually rotated, e.g. if the board is
                 manually flipped, the current player will always be at the top.</li>
                 <li>'Use chess.com FEN4 and PGN4' enables loading and saving chess.com compatible FEN4 and PGN4. NOTE:
-                chess.com does NOT currently support subvariations. If you have subvariations in your PGN4, the 
+                chess.com does NOT currently support subvariations. If you have subvariations in your PGN4, the
                 chess.com analysis board will not be able to read it.</li>
-                <li>Preferences are saved to a platform-specific preferences file, which is displayed in the status bar 
+                <li>Preferences are saved to a platform-specific preferences file, which is displayed in the status bar
                 at the bottom after saving.</li>
             </ul>
             """)
@@ -437,8 +437,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pgnErrorDialog.label.setText("""
                     <center>
                     <p><b>Cannot read PGN4!</b></p>
-                    <p>If you are trying to load a chess.com PGN4, please make sure the checkbox in settings is 
-                    <i>checked</i>. If not, make sure it is <i>unchecked</i>. You can only load a Teams variant PGN4. 
+                    <p>If you are trying to load a chess.com PGN4, please make sure the checkbox in settings is
+                    <i>checked</i>. If not, make sure it is <i>unchecked</i>. You can only load a Teams variant PGN4.
                     FFA is not supported. If the issue remains, please report it.
                     </p>
                     </center>
@@ -454,14 +454,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                   "PGN4 Files (*.pgn4)", options=options)
         if fileName:
             with open(fileName, 'r') as file:
-                pgn4 = ''.join(file.readlines())
-                self.pgnField.setPlainText(pgn4)
-                if SETTINGS.value('chesscom'):
+                pgn4 = file.read()
+            self.pgnField.setPlainText(pgn4)
+            try:
+                if SETTINGS.value('chesscom', type='bool'):
                     loaded = self.algorithm.parseChesscomPgn4(pgn4)
                 else:
                     loaded = self.algorithm.parsePgn4(pgn4)
-                if loaded:
-                    self.statusbar.showMessage('Game loaded successfully.', 5000)
+            except Exception as error:
+                print(error)
+                loaded = False
+            if loaded:
+                self.statusbar.showMessage('Game loaded successfully.', 5000)
 
     def saveFileDialog(self):
         """Shows file dialog to save a game to a PGN4 file."""
@@ -745,16 +749,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 row.itemClicked.connect(lambda item, this=row: self.moveListItemClicked(item, this))
                 if level == 1:
                     row.setStyleSheet("""
-                        QListWidget {color: rgb(100, 100, 100); font-family: Trebuchet MS; font-weight: bold; 
+                        QListWidget {color: rgb(100, 100, 100); font-family: Trebuchet MS; font-weight: bold;
                         font-size: 12; background-color: rgb(240, 240, 240); padding: 2px; margin: 0px;}
-                        QListWidget::item:selected {color: rgb(100, 100, 100); 
+                        QListWidget::item:selected {color: rgb(100, 100, 100);
                         background-color: rgba(255, 255, 0, 0.3);}
                         """)
                 elif level > 1:
                     row.setStyleSheet("""
-                        QListWidget {color: rgb(150, 150, 150); font-family: Trebuchet MS; font-weight: bold; 
+                        QListWidget {color: rgb(150, 150, 150); font-family: Trebuchet MS; font-weight: bold;
                         font-size: 12; background-color: rgb(240, 240, 240); padding: 2px; margin: 0px;}
-                        QListWidget::item:selected {color: rgb(150, 150, 150); 
+                        QListWidget::item:selected {color: rgb(150, 150, 150);
                         background-color: rgba(255, 255, 0, 0.3);}
                         """)
                 else:
@@ -773,16 +777,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 row.itemClicked.connect(lambda item, this=row: self.moveListItemClicked(item, this))
                 if level == 1:
                     row.setStyleSheet("""
-                        QListWidget {color: rgb(100, 100, 100); font-family: Trebuchet MS; font-weight: bold; 
+                        QListWidget {color: rgb(100, 100, 100); font-family: Trebuchet MS; font-weight: bold;
                         font-size: 12; background-color: rgb(240, 240, 240); padding: 2px; margin: 0px;}
-                        QListWidget::item:selected {color: rgb(100, 100, 100); 
+                        QListWidget::item:selected {color: rgb(100, 100, 100);
                         background-color: rgba(255, 255, 0, 0.3);}
                         """)
                 elif level > 1:
                     row.setStyleSheet("""
-                        QListWidget {color: rgb(150, 150, 150); font-family: Trebuchet MS; font-weight: bold; 
+                        QListWidget {color: rgb(150, 150, 150); font-family: Trebuchet MS; font-weight: bold;
                         font-size: 12; background-color: rgb(240, 240, 240); padding: 2px; margin: 0px;}
-                        QListWidget::item:selected {color: rgb(150, 150, 150); 
+                        QListWidget::item:selected {color: rgb(150, 150, 150);
                         background-color: rgba(255, 255, 0, 0.3);}
                         """)
                 else:
@@ -861,6 +865,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def showPreferences(self):
         """Shows preferences window. Settings are passed to the dialog, modified and then returned."""
+
         preferencesDialog = Preferences()
         if preferencesDialog.exec_():
             self.statusbar.showMessage('Preferences saved to: ' + SETTINGS.fileName(), 5000)
@@ -879,23 +884,25 @@ class Preferences(QDialog, Ui_Preferences):
 
     def initialize(self):
         """Sets preferences to saved values. Sets default values if no preferences saved."""
-        self.showcoordinates.setChecked(SETTINGS.value('showcoordinates', False))
-        self.showlegalmoves.setChecked(SETTINGS.value('showlegalmoves', False))
-        self.coordinatehelp.setChecked(SETTINGS.value('coordinatehelp', False))
-        self.shownames.setChecked(SETTINGS.value('shownames', False))
-        self.autocolor.setChecked(SETTINGS.value('autocolor', False))
-        self.autorotate.setChecked(SETTINGS.value('autorotate', False))
-        self.chesscom.setChecked(SETTINGS.value('chesscom', False))
+
+        for name in SETTINGS.allKeys():
+            value = SETTINGS.value(name, defaultValue=False, type='bool')
+            getattr(self, name).setChecked(value)
 
     def save(self):
         """Saves preferences."""
-        SETTINGS.setValue('showcoordinates', self.showcoordinates.isChecked())
-        SETTINGS.setValue('showlegalmoves', self.showlegalmoves.isChecked())
-        SETTINGS.setValue('coordinatehelp', self.coordinatehelp.isChecked())
-        SETTINGS.setValue('shownames', self.shownames.isChecked())
-        SETTINGS.setValue('autocolor', self.autocolor.isChecked())
-        SETTINGS.setValue('autorotate', self.autorotate.isChecked())
-        SETTINGS.setValue('chesscom', self.chesscom.isChecked())
+        for name in SETTINGS.allKeys():
+            value = getattr(self, name).isChecked()
+            SETTINGS.setValue(name, value)
+        #==========================================================================================
+        # SETTINGS.setValue('showcoordinates', self.showcoordinates.isChecked())
+        # SETTINGS.setVaflue('showlegalmoves', self.showlegalmoves.isChecked())
+        # SETTINGS.setValue('coordinatehelp', self.coordinatehelp.isChecked())
+        # SETTINGS.setValue('shownames', self.shownames.isChecked())
+        # SETTINGS.setValue('autocolor', self.autocolor.isChecked())
+        # SETTINGS.setValue('autorotate', self.autorotate.isChecked())
+        # SETTINGS.setValue('chesscom', self.chesscom.isChecked())
+        #==========================================================================================
 
     def restoreDefaults(self):
         """Restores default preferences."""

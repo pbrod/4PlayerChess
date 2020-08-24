@@ -123,7 +123,8 @@ class View(QWidget):
 
     def autoRotate(self, rotation):
         """Automatically rotates board after move is made or undone."""
-        if SETTINGS.value('autorotate'):
+
+        if SETTINGS.value('autorotate', type='bool'):
             self.rotateBoard(rotation)
 
     def setCurrentPlayer(self, player):
@@ -210,7 +211,7 @@ class View(QWidget):
         painter.fillRect(self.squareRect(1, 12, self.orientation[0]), QColor('#40c09526'))
         painter.fillRect(self.squareRect(12, 12, self.orientation[0]), QColor('#404e9161'))
         # Show or hide player names
-        if SETTINGS.value('shownames'):
+        if SETTINGS.value('shownames', type='bool'):
             self.showNames()
         else:
             self.hideNames()
@@ -220,7 +221,7 @@ class View(QWidget):
                 if not self.maskedSquare == QPoint(file, rank):  # When dragging a piece, don't paint it
                     self.drawPiece(painter, file, rank)
         # Draw coordinates
-        if SETTINGS.value('showcoordinates'):
+        if SETTINGS.value('showcoordinates', type='bool'):
             for y in range(14):
                 x = 0 if 2 < y < 11 else 3
                 square = self.squareRect(x, y)
@@ -276,10 +277,10 @@ class View(QWidget):
         # Draw arrows
         self.drawArrows(painter)
         # Draw legal moves
-        if SETTINGS.value('showlegalmoves'):
+        if SETTINGS.value('showlegalmoves', type='bool'):
             self.drawLegalMoves(painter)
         # Draw coordinate help
-        if SETTINGS.value('coordinatehelp'):
+        if SETTINGS.value('coordinatehelp', type='bool'):
             if self.coordinate:
                 file = ord(self.coordinate[1][0]) - 97
                 rank = int(self.coordinate[1][1:]) - 1
@@ -361,7 +362,7 @@ class View(QWidget):
                 self.arrowColor = QColor('#ff8c00')
                 self.squareColor = QColor('#80ff8c00')
             else:
-                if SETTINGS.value('autocolor'):
+                if SETTINGS.value('autocolor', type='bool'):
                     if self.orientation[0] == 'r':
                         self.arrowColor = QColor('#ab272f')
                         self.squareColor = QColor('#80ab272f')
@@ -675,7 +676,7 @@ class View(QWidget):
 
     def showLegalMoves(self):
         """Shows legal moves."""
-        if SETTINGS.value('showlegalmoves'):
+        if SETTINGS.value('showlegalmoves') == 'true':
             fromFile = self.clickedSquare.x()
             fromRank = self.clickedSquare.y()
             identifier = self.board.getData(fromFile, fromRank)
