@@ -1,0 +1,12 @@
+[Variant "Teams"]
+[Site "www.chess.com/4-player-chess"]
+[Date "Sun Aug 23 2020 23:17:49 (UTC)"]
+[TimeControl "G/1 d15"]
+[PlyCount "7"]
+[CurrentMove "7"]
+[CurrentPosition "G-0,0,0,0-1,1,1,1-1,1,1,1-0,0,0,0-7-3,yR,yN,1,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,1,yP,yP,yP,yP,3/14/bR,bP,4,yP,5,gP,gR/bN,bP,7,yB,2,gP,gN/bB,bP,1,bB,8,gP,gB/bK,bP,10,gP,gQ/bQ,2,bP,6,gP,2,gK/1,bP,10,gP,gB/bN,bP,8,rQ,1,gP,gN/bR,bP,5,rP,4,gP,gR/14/3,rP,rP,rP,rP,1,rP,rP,rP,3/3,rR,rN,rB,1,rK,rB,rN,rR,3"]
+
+1. h2-h4 .. b7-d7 .. g13-g11 .. m7-k7 
+2. Qg1-k5 .. Ba6-d9 .. Bf14-j10 .. Qn8xQk5 ( 3.. Bn6xBj10 
+3. Qk5-i7 ( 3. Qk5-f5 .. Qa7-b7 ) ( 3. Qk5-i3 .. b5-c5 ( 3.. Bd9xh13 .. Qh14xBh13 ( 3.. Bi14xBh13 ) ) ( 3.. b11-d11 .. g11-g10 .. m10-k10 
+4. g2-g4 ) ( 3.. b10-d10 ) ) ) 
