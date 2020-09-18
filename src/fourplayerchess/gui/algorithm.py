@@ -18,6 +18,91 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Algebraic notation
+------------------
+For four-player chess the same algebraic notation as for regular chess can be used:
+
+K = king
+Q = queen
+R = rook
+B = bishop
+N = knight
+No letter is used for pawn moves.
+
+When the move is a capture, an x is inserted between the origin and destination square.
+If two pieces of the same type can move to the same square, the file or rank of origin
+(or both, if necessary) are added after the piece's letter.
+Pawn promotion is indicated by appending =Q to the move (or, in case of underpromotion, =N, =B or =R).
+Kingside castling (short castle) is notated as O-O.
+Queenside castling  (long castle) is notated as O-O-O.
+Check is indicated by appending + to the move and
+in case of double and triple check ++ and +++, respectively.
+Checkmate is indicated by appending # to the move.
+Piece manoeuvres are notated as the piece letter followed by the origin square,
+any intermediate squares and the destination square, separated by a hyphen,
+e.g. Qg1-k5-g9.
+In case of manoeuvres involving captures, the moves are written in full,
+separated by hyphens, e.g. Nk12-Nxm11-Nxn9.
+Diagonals are notated as start and end square, separated by a hyphen.
+Diagonals are always considered from left to right, hence the start square is the
+leftmost square, i.e. start and end are in alphabetical order in terms of files.
+For example, "e14-n5 diagonal" and not "n5-e14 diagonal".
+Other common annotations include:
+
+! = good move
+!! = excellent move
+? = bad move
+?? = blunder
+!? = potentially interesting move
+?! = dubious move
+
+Long algebraic notation
+-----------------------
+Alternatively, long algebraic notation can be used for clarity.
+In long algebraic notation both the origin and destination square are indicated,
+separated by a hyphen, e.g. Qn8-m9. When the move is a capture, the hyphen is
+replaced by an x and the letter of the captured piece is also included, e.g. Qg1xQn8+.
+
+
+The movetext describes the actual moves of the game. This includes move number
+indicators (numbers followed by either one or three periods; one if the next move
+is White's move, three if the next move is Black's move) and movetext in Standard
+Algebraic Notation (SAN).
+
+For most moves the SAN consists of the letter abbreviation for the piece, an x if
+there is a capture, and the two-character algebraic name of the final square the
+piece moved to. The letter abbreviations are K (king), Q (queen), R (rook),
+B (bishop), and N (knight). The pawn is given an empty abbreviation in SAN movetext,
+but in other contexts the abbreviation P is used. The algebraic name of any square
+is as per usual algebraic chess notation; from white's perspective,
+the leftmost square closest to white is a1, the rightmost square closest to the
+white is h1, and the rightmost (from white's perspective) square closest to black
+side is h8.
+
+In a few cases a more detailed representation is needed to resolve ambiguity;
+if so, the piece's file letter, numerical rank, or the exact square is inserted
+after the moving piece's name (in that order of preference). Thus, Nge2 specifies
+that the knight originally on the g-file moves to e2.
+
+SAN kingside castling is indicated by the sequence O-O;
+queenside castling is indicated by the sequence O-O-O (note that these are capital Os,
+not zeroes, contrary to the FIDE standard for notation).
+[3] Pawn promotions are notated by appending = to the destination square,
+followed by the piece the pawn is promoted to. For example: e8=Q. If the move is a
+checking move, + is also appended; if the move is a checkmating move, # is appended
+instead. For example: e8=Q#.
+
+An annotator who wishes to suggest alternative moves to those actually played in the
+game may insert variations enclosed in parentheses. They may also comment on the game
+by inserting Numeric Annotation Glyphs (NAGs) into the movetext. Each NAG reflects a
+subjective impression of the move preceding the NAG or of the resultant position.
+
+If the game result is anything other than *, the result is repeated at the end of
+the movetext.
+
+"""
+
 # pylint: disable=no-name-in-module
 from PyQt5.QtCore import QObject, pyqtSignal, QSettings
 from PyQt5.QtGui import QColor
@@ -742,6 +827,9 @@ class Algorithm(QObject):
                     setattr(self, name, tag[1])
                 elif tag[0] == 'CurrentMove':
                     currentMove = tag[1]
+                    if '-' in currentMove:  # TODO: is this correct?
+                        self.cannotReadPgn4.emit()
+                        return False
                 # else: # Irrelevant tags
                 continue
 
@@ -825,87 +913,6 @@ class Algorithm(QObject):
         https://en.wikipedia.org/wiki/Portable_Game_Notation
         https://ia802908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt
 
-        Algebraic notation
-        ------------------
-        For four-player chess the same algebraic notation as for regular chess can be used:
-
-        K = king
-        Q = queen
-        R = rook
-        B = bishop
-        N = knight
-        No letter is used for pawn moves.
-
-        When the move is a capture, an x is inserted between the origin and destination square.
-        If two pieces of the same type can move to the same square, the file or rank of origin
-        (or both, if necessary) are added after the piece's letter.
-        Pawn promotion is indicated by appending =Q to the move (or, in case of underpromotion, =N, =B or =R).
-        Kingside castling (short castle) is notated as O-O.
-        Queenside castling  (long castle) is notated as O-O-O.
-        Check is indicated by appending + to the move and
-        in case of double and triple check ++ and +++, respectively.
-        Checkmate is indicated by appending # to the move.
-        Piece manoeuvres are notated as the piece letter followed by the origin square,
-        any intermediate squares and the destination square, separated by a hyphen,
-        e.g. Qg1-k5-g9.
-        In case of manoeuvres involving captures, the moves are written in full,
-        separated by hyphens, e.g. Nk12-Nxm11-Nxn9.
-        Diagonals are notated as start and end square, separated by a hyphen.
-        Diagonals are always considered from left to right, hence the start square is the
-        leftmost square, i.e. start and end are in alphabetical order in terms of files.
-        For example, "e14-n5 diagonal" and not "n5-e14 diagonal".
-        Other common annotations include:
-
-        ! = good move
-        !! = excellent move
-        ? = bad move
-        ?? = blunder
-        !? = potentially interesting move
-        ?! = dubious move
-
-        Long algebraic notation
-        -----------------------
-        Alternatively, long algebraic notation can be used for clarity.
-        In long algebraic notation both the origin and destination square are indicated,
-        separated by a hyphen, e.g. Qn8-m9. When the move is a capture, the hyphen is
-        replaced by an x and the letter of the captured piece is also included, e.g. Qg1xQn8+.
-
-
-        The movetext describes the actual moves of the game. This includes move number
-        indicators (numbers followed by either one or three periods; one if the next move
-        is White's move, three if the next move is Black's move) and movetext in Standard
-        Algebraic Notation (SAN).
-
-        For most moves the SAN consists of the letter abbreviation for the piece, an x if
-        there is a capture, and the two-character algebraic name of the final square the
-        piece moved to. The letter abbreviations are K (king), Q (queen), R (rook),
-        B (bishop), and N (knight). The pawn is given an empty abbreviation in SAN movetext,
-        but in other contexts the abbreviation P is used. The algebraic name of any square
-        is as per usual algebraic chess notation; from white's perspective,
-        the leftmost square closest to white is a1, the rightmost square closest to the
-        white is h1, and the rightmost (from white's perspective) square closest to black
-        side is h8.
-
-        In a few cases a more detailed representation is needed to resolve ambiguity;
-        if so, the piece's file letter, numerical rank, or the exact square is inserted
-        after the moving piece's name (in that order of preference). Thus, Nge2 specifies
-        that the knight originally on the g-file moves to e2.
-
-        SAN kingside castling is indicated by the sequence O-O;
-        queenside castling is indicated by the sequence O-O-O (note that these are capital Os,
-        not zeroes, contrary to the FIDE standard for notation).
-        [3] Pawn promotions are notated by appending = to the destination square,
-        followed by the piece the pawn is promoted to. For example: e8=Q. If the move is a
-        checking move, + is also appended; if the move is a checkmating move, # is appended
-        instead. For example: e8=Q#.
-
-        An annotator who wishes to suggest alternative moves to those actually played in the
-        game may insert variations enclosed in parentheses. They may also comment on the game
-        by inserting Numeric Annotation Glyphs (NAGs) into the movetext. Each NAG reflects a
-        subjective impression of the move preceding the NAG or of the resultant position.
-
-        If the game result is anything other than *, the result is repeated at the end of
-        the movetext.
         """
 
         currentPosition = None
@@ -936,6 +943,9 @@ class Algorithm(QObject):
                     setattr(self, name, tag[1])
                 elif tag[0] == 'CurrentPosition':
                     currentPosition = tag[1]
+                    if ',' in currentPosition:
+                        self.cannotReadPgn4.emit()
+                        return False
                 # else: # Irrelevant tags
                 continue
 
