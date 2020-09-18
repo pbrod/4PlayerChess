@@ -18,11 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# pylint: disable=no-name-in-module
 from PyQt5.QtCore import QObject, pyqtSignal, QSettings
 from PyQt5.QtGui import QColor
 from collections import deque
 from datetime import datetime
-from re import split
+import re
 from .board import Board
 
 # Load settings
@@ -696,7 +697,7 @@ class Algorithm(QObject):
     def split_(movetext):
         """Splits movetext into tokens."""
         # regex: one or more spaces followed by { or preceded by }
-        x = split('\s+(?={)|(?<=})\s+', movetext)
+        x = re.split(r'\s+(?={)|(?<=})\s+', movetext)
         movetext = []
         for y in x:
             if y:
@@ -727,7 +728,7 @@ class Algorithm(QObject):
             line = line.strip()  # pab
             if line == '':
                 continue
-            elif line[0] == '[' and line[-1] == ']':
+            if line[0] == '[' and line[-1] == ']':
                 #==================================================================================
                 # Tags section
                 #==================================================================================
@@ -743,11 +744,11 @@ class Algorithm(QObject):
                     currentMove = tag[1]
                 # else: # Irrelevant tags
                 continue
-            else:
-                if not currentMove:
-                    self.cannotReadPgn4.emit()
-                    return False
-                movetext += line + ' '
+
+            if not currentMove:
+                self.cannotReadPgn4.emit()
+                return False
+            movetext += line + ' '
 
             #======================================================================================
             # Movetext section
@@ -954,8 +955,7 @@ class Algorithm(QObject):
             roots = []
             tokens = self.split_(line)
             prev = None
-            i = 0
-            for token in tokens:
+            for i, token in enumerate(tokens):
                 try:
                     next_ = tokens[i + 1]
                 except IndexError:
@@ -982,7 +982,7 @@ class Algorithm(QObject):
                     fromFile, fromRank, toFile, toRank = self.fromAlgebraic(token, self.currentPlayer)
                     self.makeMove(fromFile, fromRank, toFile, toRank)
                 prev = token
-                i += 1
+
         # Set game position to FEN4
         self.firstMove()
         node = None
