@@ -125,12 +125,14 @@ class Algorithm(QObject):
                 return actions
             else:
                 var = self.parent.children.index(self)
-                actions.insert(0, 'nextMove(' + str(var) + ')')
+                actions.insert(0, var)  # pab new
+                #actions.insert(0, 'nextMove(' + str(var) + ')')
             return self.parent.pathFromRoot(actions)
 
         def getMoveNumber(self):
             """Returns the move number in the format (ply, variation, move). NOTE: does NOT support subvariations."""
-            varNum = [int(a.strip('nextMove()')) for a in self.pathFromRoot()]
+            # varNum = [int(a.strip('nextMove()')) for a in self.pathFromRoot()]
+            varNum = self.pathFromRoot()  # pab new
             ply, var, move = (0, 0, 0)
             plyCount = True
             i = 0
@@ -935,7 +937,7 @@ class Algorithm(QObject):
                     currentPosition = tag[1]
                 # else: # Irrelevant tags
                 continue
-            
+
             if not currentPosition:
                 self.cannotReadPgn4.emit()
                 return False
@@ -990,7 +992,8 @@ class Algorithm(QObject):
         if node:
             actions = node.pathFromRoot()
             for action in actions:
-                exec('self.' + action)
+                self.nextMove(action)  # pab new
+                # exec('self.' + action)
         # Emit signal to update player names
         self.playerNamesChanged.emit(self.redName, self.blueName, self.yellowName, self.greenName)
         return True

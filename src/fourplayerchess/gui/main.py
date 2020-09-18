@@ -645,7 +645,8 @@ FFA is not supported. If the issue remains, please report it.
                 actions = currentNode.pathFromRoot()
                 main.algorithm.firstMove()
                 for action in actions:
-                    exec('main.algorithm.' + action)
+                    main.algorithm.nextMove(action) # pab new
+                    # exec('main.algorithm.' + action)
                 # Update move tree
                 parentNode.children.remove(baseNode)
                 parentNode.children.insert(0, baseNode)  # moving node to index 0 makes it main line
@@ -673,7 +674,8 @@ FFA is not supported. If the issue remains, please report it.
                 actions = currentNode.parent.pathFromRoot()
                 main.algorithm.firstMove()
                 for action in actions:
-                    exec('main.algorithm.' + action)
+                    main.algorithm.nextMove(action)  # pab new
+                    #exec('main.algorithm.' + action)
                 # Delete move and all following moves
                 for i in reversed(range(rowIndex, self.count())):  # NOTE: reversed range, because modified during loop
                     move = self.takeItem(i)
@@ -799,7 +801,8 @@ FFA is not supported. If the issue remains, please report it.
                 actions = clickedNode.pathFromRoot()
                 self.algorithm.firstMove()
                 for action in actions:
-                    exec('self.algorithm.' + action)
+                    self.algorithm.nextMove(action) # pab new
+                    #exec('self.algorithm.' + action)
 
     def selectMove(self, key):
         """Makes current move selected in the move list."""
