@@ -24,7 +24,8 @@ A Python/Qt application for the [4-Player Chess](https://www.chess.com/4-player-
 
 **Latest Release:** version [0.10.0](https://github.com/GammaDeltaII/4PlayerChess/releases/latest)
 
-You can check for updates from the application menu (*4PlayerChess > Check for Updates...*). (In case of an *SSL* error, make sure `certifi` is installed: `pip3 install certifi`.)
+You can check for updates from the application menu (*4PlayerChess > Check for Updates...*). 
+(In case of an *SSL* error, make sure `certifi` is installed: `pip3 install certifi`.)
 
 ## Features
 - Rotatable board with move, turn and piece highlighting
@@ -69,11 +70,17 @@ Open Terminal to enter the commands at the following steps.
     ```
     pip3 install pyqt5
     ```
-4. Navigate to the `/4PlayerChess` directory and run the main file:
+4. Navigate to the `/4PlayerChess` directory and install four-player chess:
     ```
     cd path/to/directory
-    python3 4pc.py
+    python3 setup.py install
     ```
+5. Start the four-player chess:
+    ```    
+    4pc
+    ```
+
+
 #### Windows
 Open Command Prompt (open Windows menu and search "command") to enter the commands at the following steps.
 
@@ -90,10 +97,14 @@ Open Command Prompt (open Windows menu and search "command") to enter the comman
     ```
     py -m pip install pyqt5
     ```
-3. Navigate to the `/4PlayerChess` directory and run the main file:
+3. Navigate to the `/4PlayerChess` directory and install four-player chess:
     ```
     cd path/to/directory
-    py 4pc.py
+    py setup.py install
+    ```
+4. Start the four-player chess:
+    ```    
+    4pc
     ```
 
 #### Linux
@@ -113,10 +124,14 @@ Open a terminal to enter the commands at the following steps.
     ```
     pip3 install pyqt5
     ```
-4. Navigate to the `/4PlayerChess` directory and run the main file:
+4. Navigate to the `/4PlayerChess` directory and install four-player chess:
     ```
     cd path/to/directory
-    python3 4pc.py
+    python3 setup.py install
+    ```
+5. Start the four-player chess:
+    ```    
+    4pc
     ```
 
 #### Notes

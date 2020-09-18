@@ -23,9 +23,9 @@
 
 import os
 import sys
-#from utilities.global_settings.initialize_logger import logger
-#from utilities.global_settings import standalone_logging  # @UnusedImport
-
+# from utilities.global_settings.initialize_logger import logger
+# from utilities.global_settings import standalone_logging  # @UnusedImport
+# pylint: disable=no-name-in-module
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QRect
