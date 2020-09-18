@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<img src="resources/img/icon.png" width="100" height="100">
+<img src="src/resources/img/icon.png" width="100" height="100">
 
 # 4PlayerChess
 A Python/Qt application for the [4-Player Chess](https://www.chess.com/4-player-chess) Teams variant to perform analysis. This project is a work in progress.
