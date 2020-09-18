@@ -19,10 +19,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QLineEdit, QPlainTextEdit, QFrame
-from PyQt5.QtCore import Qt, QSize, QRect, QRectF, QPoint, pyqtSignal, QEvent, QByteArray, QDataStream, QIODevice, \
-    QMimeData, QLineF, QSettings
-from PyQt5.QtGui import QPainter, QPalette, QColor, QFont, QDrag, QIcon, QCursor, QPolygonF, QPainterPath, QPen, \
-    QBrush
+from PyQt5.QtCore import (Qt, QSize, QRect, QRectF, QPoint, pyqtSignal, QEvent, QByteArray,
+                          QDataStream, QIODevice, QMimeData, QLineF, QSettings)
+from PyQt5.QtGui import (QPainter, QPalette, QColor, QFont, QDrag, QIcon, QCursor, QPolygonF,
+                         QPainterPath, QPen,  QBrush)
 from collections import deque
 from .board import Board
 
@@ -33,8 +33,9 @@ SETTINGS = QSettings(COM, APP)
 
 
 class View(QWidget):
-    """The View is responsible for rendering the current state of the board and signalling user interaction to the
-    underlying logic."""
+    """The View is responsible for rendering the current state of the board and signalling
+    user interaction to the underlying logic.
+    """
     clicked = pyqtSignal(QPoint)
     squareSizeChanged = pyqtSignal(QSize)
     playerNameEdited = pyqtSignal(str, str, str, str)

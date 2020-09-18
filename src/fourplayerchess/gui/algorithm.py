@@ -907,80 +907,80 @@ class Algorithm(QObject):
 
         currentPosition = None
         lines = pgn4.split('\n')
+        attributes = {'Red': 'redName',
+
+                      'Blue': 'blueName',
+
+                      'Yellow': 'yellowName',
+
+                      'Green': 'greenName',
+
+                      'Result': 'result'
+                      }
         for line in lines:
             line = line.strip()  # pab
             if line == '':
                 continue
-            elif line[0] == '[' and line[-1] == ']':
+            if line[0] == '[' and line[-1] == ']':
                 # tag pair section
                 tag = line.strip('[]').split('"')[:-1]
                 tag[0] = tag[0].strip()
                 if tag[0] == 'Variant' and tag[1] == 'FFA':
                     self.cannotReadPgn4.emit()
                     return False
-                elif tag[0] == 'Red':
-                    self.redName = tag[1]
-                elif tag[0] == 'Blue':
-                    self.blueName = tag[1]
-                elif tag[0] == 'Yellow':
-                    self.yellowName = tag[1]
-                elif tag[0] == 'Green':
-                    self.greenName = tag[1]
-                elif tag[0] == 'Result':
-                    self.result = tag[1]
+                name = attributes.get(tag[0])
+                if name is not None:
+                    setattr(self, name, tag[1])
                 elif tag[0] == 'CurrentPosition':
                     currentPosition = tag[1]
-                else:
-                    # Irrelevant tags
+                # else: # Irrelevant tags
+                continue
+            
+            if not currentPosition:
+                self.cannotReadPgn4.emit()
+                return False
+            # movetext section.
+            # Generate game from movetext
+            self.newGame()
+            line = line.replace(' *', '')
+            line = line.replace(' 1-0', '')
+            line = line.replace(' 0-1', '')
+            line = line.replace(' 1/2-1/2', '')
+            if line == '*':
+                # No movetext to process
+                break
+            roots = []
+            tokens = self.split_(line)
+            prev = None
+            i = 0
+            for token in tokens:
+                try:
+                    next_ = tokens[i + 1]
+                except IndexError:
+                    next_ = None
+                if token[0].isdigit() or token[0] == '.':
                     pass
-            else:
-                if not currentPosition:
-                    self.cannotReadPgn4.emit()
-                    return False
-                # movetext section.
-                # Generate game from movetext
-                self.newGame()
-                line = line.replace(' *', '')
-                line = line.replace(' 1-0', '')
-                line = line.replace(' 0-1', '')
-                line = line.replace(' 1/2-1/2', '')
-                if line == '*':
-                    # No movetext to process
-                    break
-                roots = []
-                tokens = self.split_(line)
-                prev = None
-                i = 0
-                for token in tokens:
-                    try:
-                        next_ = tokens[i + 1]
-                    except IndexError:
-                        next_ = None
-                    if token[0].isdigit() or token[0] == '.':
-                        pass
-                    elif token[0] == '{':
-                        # Comment
-                        self.currentMove.comment = token[1:-1].strip()
-                    elif token == '(':
-                        # Next move is variation
-                        if not prev == ')':
-                            self.prevMove()
-                            roots.append(self.currentMove)
-                        else:
-                            roots.append(self.currentMove)
-                    elif token == ')':
-                        # End of variation
-                        root = roots.pop()
-                        while self.currentMove.name != root.name:
-                            self.prevMove()
-                        if next_ != '(':
-                            # Continue with previous line
-                            self.nextMove()
-                    else:
-                        fromFile, fromRank, toFile, toRank = self.fromAlgebraic(token, self.currentPlayer)
-                        self.makeMove(fromFile, fromRank, toFile, toRank)
-                    prev = token
-                    i += 1
+                elif token[0] == '{':
+                    # Comment
+                    self.currentMove.comment = token[1:-1].strip()
+                elif token == '(':
+                    # Next move is variation
+                    if not prev == ')':
+                        self.prevMove()
+                    roots.append(self.currentMove)
+                elif token == ')':
+                    # End of variation
+                    root = roots.pop()
+                    while self.currentMove.name != root.name:
+                        self.prevMove()
+                    if next_ != '(':
+                        # Continue with previous line
+                        self.nextMove()
+                else:
+                    fromFile, fromRank, toFile, toRank = self.fromAlgebraic(token, self.currentPlayer)
+                    self.makeMove(fromFile, fromRank, toFile, toRank)
+                prev = token
+                i += 1
         # Set game position to FEN4
         self.firstMove()
         node = None

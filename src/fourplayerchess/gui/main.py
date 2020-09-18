@@ -379,8 +379,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.selectedSquare = 0
 
     def keyPressEvent(self, event):
-        """Handles arrow key press events to go to previous, next, first or last move. Also stores key modifier for View
-        to draw different color arrows and squares."""
+        """Handles arrow key press events to go to previous, next, first or last move.
+        Also stores key modifier for View to draw different color arrows and squares.
+        """
         if event.key() == Qt.Key_Left:
             self.algorithm.prevMove()
         if event.key() == Qt.Key_Right:
@@ -400,14 +401,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pgnErrorDialog = InfoDialog()
         pgnErrorDialog.setWindowTitle('PGN4 parse error')
         pgnErrorDialog.label.setText("""
-                    <center>
-                    <p><b>Cannot read PGN4!</b></p>
-                    <p>If you are trying to load a chess.com PGN4, please make sure the checkbox in settings is
-                    <i>checked</i>. If not, make sure it is <i>unchecked</i>. You can only load a Teams variant PGN4.
-                    FFA is not supported. If the issue remains, please report it.
-                    </p>
-                    </center>
-                    """)
+<center>
+<p><b>Cannot read PGN4!</b></p>
+<p>If you are trying to load a chess.com PGN4, please make sure the checkbox in settings is
+<i>checked</i>. If not, make sure it is <i>unchecked</i>. You can only load a Teams variant PGN4.
+FFA is not supported. If the issue remains, please report it.
+</p>
+</center>
+""")
         pgnErrorDialog.exec_()
 
     def _parcePgn4(self, pgn4):
@@ -419,6 +420,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 loaded = self.algorithm.parsePgn4(pgn4)
         except Exception as error:
             print(error)
+            self.algorithm.cannotReadPgn4.emit()
             loaded = False
         return loaded
 
