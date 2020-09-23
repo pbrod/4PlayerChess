@@ -66,19 +66,23 @@ class Board(QObject):
         """Gets set of pieces of one type and color."""
         return self.pieceBB[color] & self.pieceBB[piece]
 
-    def square(self, file, rank):
+    @staticmethod
+    def square(file, rank):
         """Little-Endian Rank-File (LERF) mapping for 14x14 bitboard embedded in 16x16 bitboard (to fit 256 bits)."""
         return (rank + 1) << 4 | (file + 1)
 
-    def square256(self, file, rank):
+    @staticmethod
+    def square256(file, rank):
         """Little-Endian Rank-File (LERF) mapping for 16x16 bitboard."""
         return rank << 4 | file
 
-    def fileRank(self, square):
+    @staticmethod
+    def fileRank(square):
         """Returns file and rank of square."""
         return (square & 15) - 1, (square >> 4) - 1
 
-    def bitScanForward(self, bitboard):
+    @staticmethod
+    def bitScanForward(bitboard):
         """Finds the index of the least significant 1 bit (LS1B) using De Bruijn sequence multiplication."""
         assert bitboard != 0
         return index256[(((bitboard & -bitboard) * debruijn256) >> 248) & 255]
@@ -158,63 +162,74 @@ class Board(QObject):
     #     else:
     #         pass
 
-    def shiftN(self, bitboard, n=1):
+    @staticmethod
+    def shiftN(bitboard, n=1):
         """Shifts bitboard north by n squares."""
         for _ in range(n):
             bitboard = (bitboard << 16) & notTopRank
         return bitboard
 
-    def shiftNE(self, bitboard, n=1):
+    @staticmethod
+    def shiftNE(bitboard, n=1):
         """Shifts bitboard north-east by n squares."""
         for _ in range(n):
             bitboard = (bitboard << 17) & notLeftFile
         return bitboard
 
-    def shiftE(self, bitboard, n=1):
+    @staticmethod
+    def shiftE(bitboard, n=1):
         """Shifts bitboard east by n squares."""
         for _ in range(n):
             bitboard = (bitboard << 1) & notLeftFile
         return bitboard
 
-    def shiftSE(self, bitboard, n=1):
+    @staticmethod
+    def shiftSE(bitboard, n=1):
         """Shifts bitboard south-east by n squares."""
         for _ in range(n):
             bitboard = (bitboard >> 15) & notRightFile
         return bitboard
 
-    def shiftS(self, bitboard, n=1):
+    @staticmethod
+    def shiftS(bitboard, n=1):
         """Shifts bitboard south by n squares."""
         for _ in range(n):
             bitboard >>= 16  # no wrap mask needed, as bits just fall off
         return bitboard
 
-    def shiftSW(self, bitboard, n=1):
+    @staticmethod
+    def shiftSW(bitboard, n=1):
         """Shifts bitboard south-west by n squares."""
         for _ in range(n):
             bitboard = (bitboard >> 17) & notRightFile
         return bitboard
 
-    def shiftW(self, bitboard, n=1):
+    @staticmethod
+    def shiftW(bitboard, n=1):
         """Shifts bitboard west by n squares."""
         for _ in range(n):
             bitboard = (bitboard >> 1) & notRightFile
         return bitboard
 
-    def shiftNW(self, bitboard, n=1):
+    @staticmethod
+    def shiftNW(bitboard, n=1):
         """Shifts bitboard north-west by n squares."""
         for _ in range(n):
             bitboard = (bitboard << 15) & notLeftFile
         return bitboard
 
-    def rankMask(self, origin):
+    @staticmethod
+    def rankMask(origin):
         """Returns rank passing through origin, excluding origin itself."""
         return (0xffff << (origin & 240)) ^ (1 << origin)  # excluding piece square
 
-    def fileMask(self, origin):
+    @staticmethod
+    def fileMask(origin):
         """Returns file passing through origin, excluding origin itself."""
         return (0x1000100010001000100010001000100010001000100010001000100010001 << (origin & 15)) ^ (1 << origin)
 
-    def diagonalMask(self, origin):
+    @staticmethod
+    def diagonalMask(origin):
         """Returns diagonal passing through origin, excluding origin itself."""
         mainDiagonal = 0x8000400020001000080004000200010000800040002000100008000400020001
         diagonal = 16 * (origin & 15) - (origin & 240)
@@ -222,7 +237,8 @@ class Board(QObject):
         south = diagonal & (-diagonal >> 63)
         return ((mainDiagonal >> south) << north) ^ (1 << origin)
 
-    def antiDiagonalMask(self, origin):
+    @staticmethod
+    def antiDiagonalMask(origin):
         """Returns anti-diagonal passing through origin, excluding origin itself."""
         mainDiagonal = 0x1000200040008001000200040008001000200040008001000200040008000
         diagonal = 240 - 16 * (origin & 15) - (origin & 240)
@@ -316,7 +332,8 @@ class Board(QObject):
         elif piece == QUEEN:
             return self.maskBlockedSquares(self.queenMoves(origin), origin) & ~friendly & pinMask
         elif piece == KING:
-            if self.kingInCheck(color):
+            inCheck, _unused_file_rank = self.kingInCheck(color)
+            if inCheck:
                 castlingMoves = 0
             else:
                 castlingMoves = self.castle[color][KINGSIDE] | self.castle[color][QUEENSIDE]
@@ -487,8 +504,7 @@ class Board(QObject):
         kingSquare = self.bitScanForward(self.pieceSet(color, KING))
         if color in (RED, YELLOW):
             return self.attacked(kingSquare, BLUE) or self.attacked(kingSquare, GREEN), self.fileRank(kingSquare)
-        else:
-            return self.attacked(kingSquare, RED) or self.attacked(kingSquare, YELLOW), self.fileRank(kingSquare)
+        return self.attacked(kingSquare, RED) or self.attacked(kingSquare, YELLOW), self.fileRank(kingSquare)
 
     def printBB(self, bitboard):
         """Prints 14x14 bitboard in easily readable format (for debugging)."""
