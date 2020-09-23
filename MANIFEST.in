@@ -1,0 +1,9 @@
+graft docs
+graft src/fourplayerchess
+include requirements.txt
+include README.md
+include COPYING.txt
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .svn*
+global-exclude Makefile
