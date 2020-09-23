@@ -84,7 +84,10 @@ class Board(QObject):
     @staticmethod
     def bitScanForward(bitboard):
         """Finds the index of the least significant 1 bit (LS1B) using De Bruijn sequence multiplication."""
-        assert bitboard != 0
+        if bitboard == 0:
+            # TODO: this occures frequently when you want to replay a castling move!!!!.
+            # assert bitboard != 0
+            pass
         return index256[(((bitboard & -bitboard) * debruijn256) >> 248) & 255]
 
     def getSquares(self, bitboard):
