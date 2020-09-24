@@ -38,14 +38,14 @@ IDENTIFIER = {'r':RED,
               'K':KING}
 QUEENSIDE, KINGSIDE = (0, 1)
 
-notLeftFile = 0xfffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffe
-notRightFile = 0x7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff
-notTopRank = 0x0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+NOT_LEFT_FILE = 0xfffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffe
+NOT_RIGHT_FILE = 0x7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff7fff
+NOT_TOP_RANK = 0x0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
-boardMask = 0xff00ff00ff07ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe0ff00ff00ff00000  # without 3x3 corners
-boardEdgeMask = 0xff008100810781e400240024002400240024002781e081008100ff00000
-squareBoardMask = 0x7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe0000  # full 14x14 board
-squareBoardEdgeMask = 0x7ffe4002400240024002400240024002400240024002400240027ffe0000
+BOARD_MASK = 0xff00ff00ff07ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe0ff00ff00ff00000  # without 3x3 corners
+BOARD_EDGE_MASK = 0xff008100810781e400240024002400240024002781e081008100ff00000
+SQUARE_BOARD_MASK = 0x7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe7ffe0000  # full 14x14 board
+SQUARE_BOARD_EDGE_MASK = 0x7ffe4002400240024002400240024002400240024002400240027ffe0000
 
 # 256-bit De Bruijn sequence and corresponding index lookup
 debruijn256 = 0x818283848586878898a8b8c8d8e8f929395969799a9b9d9e9faaeb6bedeeff
@@ -178,28 +178,28 @@ class Board(QObject):
     def shiftN(bitboard, n=1):
         """Shifts bitboard north by n squares."""
         for _ in range(n):
-            bitboard = (bitboard << 16) & notTopRank
+            bitboard = (bitboard << 16) & NOT_TOP_RANK
         return bitboard
 
     @staticmethod
     def shiftNE(bitboard, n=1):
         """Shifts bitboard north-east by n squares."""
         for _ in range(n):
-            bitboard = (bitboard << 17) & notLeftFile
+            bitboard = (bitboard << 17) & NOT_LEFT_FILE
         return bitboard
 
     @staticmethod
     def shiftE(bitboard, n=1):
         """Shifts bitboard east by n squares."""
         for _ in range(n):
-            bitboard = (bitboard << 1) & notLeftFile
+            bitboard = (bitboard << 1) & NOT_LEFT_FILE
         return bitboard
 
     @staticmethod
     def shiftSE(bitboard, n=1):
         """Shifts bitboard south-east by n squares."""
         for _ in range(n):
-            bitboard = (bitboard >> 15) & notRightFile
+            bitboard = (bitboard >> 15) & NOT_RIGHT_FILE
         return bitboard
 
     @staticmethod
@@ -213,21 +213,21 @@ class Board(QObject):
     def shiftSW(bitboard, n=1):
         """Shifts bitboard south-west by n squares."""
         for _ in range(n):
-            bitboard = (bitboard >> 17) & notRightFile
+            bitboard = (bitboard >> 17) & NOT_RIGHT_FILE
         return bitboard
 
     @staticmethod
     def shiftW(bitboard, n=1):
         """Shifts bitboard west by n squares."""
         for _ in range(n):
-            bitboard = (bitboard >> 1) & notRightFile
+            bitboard = (bitboard >> 1) & NOT_RIGHT_FILE
         return bitboard
 
     @staticmethod
     def shiftNW(bitboard, n=1):
         """Shifts bitboard north-west by n squares."""
         for _ in range(n):
-            bitboard = (bitboard << 15) & notLeftFile
+            bitboard = (bitboard << 15) & NOT_LEFT_FILE
         return bitboard
 
     @staticmethod
@@ -384,9 +384,8 @@ class Board(QObject):
         else:
             return 0
         if attacksOnly:  # only return attacked squares
-            return attacks & boardMask
-        else:
-            return (singlePush | doublePush | captures) & boardMask
+            return attacks & BOARD_MASK
+        return (singlePush | doublePush | captures) & BOARD_MASK
 
     def knightMoves(self, origin):
         """Pseudo-legal knight moves."""
@@ -399,19 +398,19 @@ class Board(QObject):
         SWW = self.shiftSW(self.shiftW(origin))
         NWW = self.shiftNW(self.shiftW(origin))
         NNW = self.shiftN(self.shiftNW(origin))
-        return (NNE | NEE | SEE | SSE | SSW | SWW | NWW | NNW) & boardMask
+        return (NNE | NEE | SEE | SSE | SSW | SWW | NWW | NNW) & BOARD_MASK
 
     def bishopMoves(self, origin):
         """Pseudo-legal bishop moves."""
-        return (self.diagonalMask(origin) | self.antiDiagonalMask(origin)) & boardMask
+        return (self.diagonalMask(origin) | self.antiDiagonalMask(origin)) & BOARD_MASK
 
     def rookMoves(self, origin):
         """Pseudo-legal rook moves."""
-        return (self.fileMask(origin) | self.rankMask(origin)) & boardMask
+        return (self.fileMask(origin) | self.rankMask(origin)) & BOARD_MASK
 
     def queenMoves(self, origin):
         """Pseudo-legal queen moves (= union of bishop and rook)."""
-        return (self.bishopMoves(origin) | self.rookMoves(origin)) & boardMask
+        return (self.bishopMoves(origin) | self.rookMoves(origin)) & BOARD_MASK
 
     def kingMoves(self, origin):
         """Pseudo-legal king moves."""
@@ -419,7 +418,7 @@ class Board(QObject):
         moves = self.shiftW(kingSet) | self.shiftE(kingSet)
         kingSet |= moves
         moves |= self.shiftN(kingSet) | self.shiftS(kingSet)
-        return moves & boardMask
+        return moves & BOARD_MASK
 
     def xrayRookAttacks(self, blockers, origin):
         """Returns X-ray rook attacks through blockers."""
