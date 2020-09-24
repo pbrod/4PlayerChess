@@ -26,7 +26,16 @@ APP = '4PlayerChess'
 SETTINGS = QSettings(COM, APP)
 
 RED, BLUE, YELLOW, GREEN, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING = range(10)
-
+IDENTIFIER = {'r':RED,
+              'b':BLUE,
+              'y':YELLOW,
+              'g':GREEN,
+              'P':PAWN,
+              'N':KNIGHT,
+              'B':BISHOP,
+              'R':ROOK,
+              'Q':QUEEN,
+              'K':KING}
 QUEENSIDE, KINGSIDE = (0, 1)
 
 notLeftFile = 0xfffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffe
@@ -531,11 +540,11 @@ class Board(QObject):
             bitstring += '\n'
         print(bitstring)
 
-    def getPieceColor(self, char):
+    @staticmethod
+    def getPieceColor(char):
         """Returns piece type and color from two character identifier."""
-        identifier = ['r', 'b', 'y', 'g', 'P', 'N', 'B', 'R', 'Q', 'K']
-        color = identifier.index(char[0])
-        piece = identifier.index(char[1])
+        color = IDENTIFIER[char[0]]
+        piece = IDENTIFIER[char[1]]
         return piece, color
 
     def initBoard(self):
