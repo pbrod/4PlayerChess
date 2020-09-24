@@ -804,9 +804,14 @@ class Board(QObject):
         self.autoRotate.emit(1)
 
     def castlingAvailability(self):
-        """Returns castling availability string."""
+        """Returns castling availability string.
+
+        The string is a color identifier plus a "K" if kingside castling available or a
+        "Q" if queenside is available.
+        If no player can castle a "-" is returned.
+        """
         castling = ''
-        # "K" if kingside castling available, "Q" if queenside, "-" if no player can castle
+
         if self.castle[RED][KINGSIDE]:
             castling += 'rK'
         if self.castle[RED][QUEENSIDE]:
