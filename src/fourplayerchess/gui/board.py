@@ -274,8 +274,7 @@ class Board(QObject):
             return self.fileMask(square) & (positive if s > 0 else negative)
         elif direction == 17:
             return self.diagonalMask(square) & (positive if s > 0 else negative)
-        else:
-            return 0
+        return 0
 
     def rayBetween(self, origin, square):
         """Returns part of ray from origin to square."""
@@ -299,8 +298,7 @@ class Board(QObject):
         elif direction == 17:
             return (self.diagonalMask(square) & (negSquare if s > 0 else posSquare)) & \
                    (self.diagonalMask(origin) & (posOrigin if s > 0 else negOrigin))
-        else:
-            return 0
+        return 0
 
     def maskBlockedSquares(self, moves, origin, occupied=None):
         """Masks blocked parts of sliding piece attack sets."""
@@ -351,8 +349,7 @@ class Board(QObject):
                 castlingMoves = self.castle[color][KINGSIDE] | self.castle[color][QUEENSIDE]
             return (self.kingMoves(origin) | self.maskBlockedCastlingMoves(castlingMoves, origin, color)) & \
                    (~friendly | castlingMoves)
-        else:
-            return -1
+        return -1
 
     def pawnMoves(self, origin, color, attacksOnly=False):
         """Pseudo-legal pawn moves."""
