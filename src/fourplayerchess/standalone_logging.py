@@ -18,12 +18,19 @@ class StdoutWrapper(object):
     def write(self, s):
         self.logger.info(s)
 
+    def flush(self):
+        pass
+
+
 
 class StderrWrapper(object):
     logger = logging.getLogger('stderr')
 
     def write(self, s):
         self.logger.error(s)
+
+    def flush(self):
+        pass
 
 
 def standalone_excepthook(ex_cls, ex, tb):

@@ -208,8 +208,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         aboutPyQt.resize(400, 320)
         aboutPyQt.label.resize(300, 140)
         buttonPos = aboutPyQt.buttonBox.pos()
-        aboutPyQt.buttonBox.move(aboutPyQt.width() / 2 - aboutPyQt.buttonBox.width() / 2,
-                                 buttonPos.y() + (aboutPyQt.height() - 300))
+        d_x = aboutPyQt.width() // 2 - aboutPyQt.buttonBox.width() // 2
+        d_y = buttonPos.y() + (aboutPyQt.height() - 300)
+        aboutPyQt.buttonBox.move(d_x, d_y)
         aboutPyQt.setWindowTitle('About PyQt')
         aboutPyQt.label.setText("""
             <center>
@@ -236,8 +237,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         labelSize = quickReferenceDialog.label.size()
         scrollArea.resize(labelSize.width() + 20, quickReferenceDialog.height() - 180)
         buttonPos = quickReferenceDialog.buttonBox.pos()
-        quickReferenceDialog.buttonBox.move(quickReferenceDialog.width() / 2 - quickReferenceDialog.buttonBox.width()
-                                            / 2, buttonPos.y() + (quickReferenceDialog.height() - 300))
+
+        d_x = quickReferenceDialog.width() // 2 - quickReferenceDialog.buttonBox.width() // 2
+        d_y = buttonPos.y() + (quickReferenceDialog.height() - 300)
+        quickReferenceDialog.buttonBox.move(d_x, d_y)
 
         quickReferenceDialog.setWindowTitle('Quick Reference Guide')
         quickReferenceDialog.label.setText("""
