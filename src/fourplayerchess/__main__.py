@@ -23,8 +23,8 @@
 
 import os
 import sys
-# from utilities.global_settings.initialize_logger import logger
-# from utilities.global_settings import standalone_logging  # @UnusedImport
+from fourplayerchess.initialize_logger import logger
+from fourplayerchess import standalone_logging  # @UnusedImport
 # pylint: disable=no-name-in-module
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
@@ -36,15 +36,17 @@ from fourplayerchess import ROOT
 def get_window(app):
     window = MainWindow()
     screen = QRect(app.desktop().availableGeometry())
-    x = screen.left() + (screen.width() - window.width()) / 2
-    y = screen.top() + (screen.height() - window.height()) / 2
+    x = screen.left() + (screen.width() - window.width()) // 2
+    y = screen.top() + (screen.height() - window.height()) // 2
+
     window.move(x, y)
     return window
 
 
 def main():
     """Creates application and main window and sets application icon."""
-    #logger.info('Finished imports, starting fourplayerchess.')
+    logger.info('Finished imports, starting fourplayerchess.')
+    print('Finished imports, starting fourplayerchess.')
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(ROOT, 'resources', 'img', 'icon.svg')))
     window = get_window(app)
@@ -52,8 +54,9 @@ def main():
     try:
         app.exec_()
     except Exception as error:
+        logger.error(str(error))
         print(error)
-    #logger.info('Ended fourplayerchess.')
+    logger.info('Ended fourplayerchess.')
 
 
 if __name__ == '__main__':

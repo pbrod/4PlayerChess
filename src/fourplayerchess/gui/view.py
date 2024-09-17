@@ -187,16 +187,16 @@ class View(QWidget):
         """Returns center of square as QPoint at position (file, rank)."""
         sqSize = self.squareSize
         if orientation == 'b':
-            return QPoint((self.board.ranks - (rank + 1)) * sqSize.width() + sqSize.width() / 2,
-                          (self.board.files - (file + 1)) * sqSize.height() + sqSize.height() / 2)
+            return QPoint((self.board.ranks - (rank + 1)) * sqSize.width() + sqSize.width() // 2,
+                          (self.board.files - (file + 1)) * sqSize.height() + sqSize.height() // 2)
         elif orientation == 'y':
-            return QPoint((self.board.files - (file + 1)) * sqSize.width() + sqSize.width() / 2,
-                          rank * sqSize.height() + sqSize.height() / 2)
+            return QPoint((self.board.files - (file + 1)) * sqSize.width() + sqSize.width() // 2,
+                          rank * sqSize.height() + sqSize.height() // 2)
         elif orientation == 'g':
-            return QPoint(rank * sqSize.width() + sqSize.width() / 2, file * sqSize.height() + sqSize.height() / 2)
+            return QPoint(rank * sqSize.width() + sqSize.width() // 2, file * sqSize.height() + sqSize.height() // 2)
         else:  # red by default
-            return QPoint(file * sqSize.width() + sqSize.width() / 2,
-                          (self.board.ranks - (rank + 1)) * sqSize.height() + sqSize.height() / 2)
+            return QPoint(file * sqSize.width() + sqSize.width() // 2,
+                          (self.board.ranks - (rank + 1)) * sqSize.height() + sqSize.height() // 2)
 
     def _get_file_and_rank(self, y, x):
         if self.orientation[0] == 'b':
@@ -255,7 +255,8 @@ class View(QWidget):
                 square = self.coordinate[0]
                 square = self.squareRect(square.x(), square.y())
                 square.moveTopLeft(QPoint(square.x(), square.y()))
-                square = QRectF(square) # Only works with QRectF, so convert
+
+                # square = QRectF(square) # Only works with QRectF, so convert # pab Do not work with QRectF anymore!!
                 # Draw twice (grey and white with offset) to get shade effect for contrast
                 painter.setPen(QColor('#80404040'))
                 painter.setFont(QFont('Trebuchet MS', 20, QFont.Bold))
@@ -509,7 +510,7 @@ class View(QWidget):
             drag = QDrag(self)
             drag.setMimeData(mimeData)
             drag.setPixmap(pixmap)
-            drag.setHotSpot(QPoint(self.squareSize.width() / 2, self.squareSize.height() / 2))
+            drag.setHotSpot(QPoint(self.squareSize.width() // 2, self.squareSize.height() // 2))
             self.maskedSquare = self.clickedSquare
             self.dragStarted.emit(self.clickedSquare)
             drag.exec_()

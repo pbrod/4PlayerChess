@@ -17,7 +17,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import certifi
 import os
+import re
+import warnings
+from pkg_resources import parse_version
+from urllib import request
+
 # pylint: disable=no-name-in-module
 from PyQt5.QtWidgets import (QMainWindow, QSizePolicy, QLayout, QListWidget, QListWidgetItem,
                              QListView, QFrame, QFileDialog, QMenu, QAction, QDialog,
@@ -30,10 +36,6 @@ from fourplayerchess.ui.infodialog import Ui_InfoDialog
 from fourplayerchess.gui.algorithm import Teams
 from fourplayerchess.gui.view import Comment
 from fourplayerchess import ROOT, __version__ as VERSION
-from urllib import request
-import certifi
-import re
-from pkg_resources import parse_version
 
 # Load settings
 COM = '4pc'
@@ -419,7 +421,7 @@ FFA is not supported. If the issue remains, please report it.
             else:
                 loaded = self.algorithm.parsePgn4(pgn4)
         except Exception as error:
-            print(error)
+            print(str(error))
             self.algorithm.cannotReadPgn4.emit()
             loaded = False
         return loaded
@@ -857,16 +859,29 @@ class Preferences(QDialog, Ui_Preferences):
         self.buttonBox.accepted.connect(self.save)
         self.buttonBox.button(QDialogButtonBox.RestoreDefaults).clicked.connect(self.restoreDefaults)
 
+    @property
+    def valid_names(self):
+        """Valid preference names"""
+        names = SETTINGS.allKeys()
+        if names:
+            return names
+        return ('showcoordinates', 'showlegalmoves', 'coordinatehelp',
+                   'shownames', 'autocolor', 'autorotate', 'chesscom')
+
     def initialize(self):
         """Sets preferences to saved values. Sets default values if no preferences saved."""
 
-        for name in SETTINGS.allKeys():
-            value = SETTINGS.value(name, defaultValue=False, type='bool')
+        for name in self.valid_names:
+            try:
+                value = SETTINGS.value(name, defaultValue=False, type='bool')
+            except AttributeError as error:
+                warnings.warn(str(error)+name)
+                raise error
             getattr(self, name).setChecked(value)
 
     def save(self):
         """Saves preferences."""
-        for name in SETTINGS.allKeys():
+        for name in self.valid_names:
             value = getattr(self, name).isChecked()
             SETTINGS.setValue(name, value)
         #==========================================================================================
@@ -881,13 +896,15 @@ class Preferences(QDialog, Ui_Preferences):
 
     def restoreDefaults(self):
         """Restores default preferences."""
-        self.showcoordinates.setChecked(False)
-        self.showlegalmoves.setChecked(False)
-        self.coordinatehelp.setChecked(False)
-        self.shownames.setChecked(False)
-        self.autocolor.setChecked(False)
-        self.autorotate.setChecked(False)
-        self.chesscom.setChecked(False)
+        for name in self.valid_names:
+            setattr(self, name, False)
+        # self.showcoordinates.setChecked(False)
+        # self.showlegalmoves.setChecked(False)
+        # self.coordinatehelp.setChecked(False)
+        # self.shownames.setChecked(False)
+        # self.autocolor.setChecked(False)
+        # self.autorotate.setChecked(False)
+        # self.chesscom.setChecked(False)
 
 
 class InfoDialog(QDialog, Ui_InfoDialog):
@@ -903,7 +920,7 @@ class InfoDialog(QDialog, Ui_InfoDialog):
         icon = QIcon(os.path.join(ROOT, 'resources', 'img', 'icon.svg'))
         width = 80
         height = 80
-        x = (self.width() - width) / 2
+        x = (self.width() - width) // 2
         y = 20
         rect = QRect(x, y, width, height)
         icon.paint(painter, rect, Qt.AlignCenter)
