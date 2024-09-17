@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 import sys
 import logging
 import traceback
-from fourplayerchess.win32_utils import ErrorDlg
+from fourplayerchess.win32_utils import ErrorDlg  # @UnresolvedImport
 
 
 class StdoutWrapper(object):
@@ -44,8 +44,6 @@ def standalone_excepthook(ex_cls, ex, tb):
     The attempted action may not have been completed.
     The following traceback has been written to the log.
     It may provide insight into the cause of the problem.
-
-    Note that tracebacks and logs may reveal classified information.
 
     '''
     if '--nodialog' not in sys.argv:
